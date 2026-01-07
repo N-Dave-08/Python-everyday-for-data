@@ -1,0 +1,4 @@
+supplier_id,supplier_name,contact_name,email,phone,address
+1,TechSupply Co,John Tech,contact@techsupply.com,555-2001,100 Tech Street
+2,Accessory World,Mary Access,info@accessoryworld.com,555-2002,200 Accessory Ave
+3,ElectroParts Inc,Tom Electro,sales@electroparts.com,555-2003,300 Electro Blvd

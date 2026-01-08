@@ -36,7 +36,7 @@ Given the list: `[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]`
 
 **Expected Output Format:**
 ```
-Sum: 42
+Sum: 44
 Maximum: 9
 Minimum: 1
 Count of 5: 3

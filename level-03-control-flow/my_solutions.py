@@ -411,22 +411,33 @@ def analyze_sales(final_result):
             if not isinstance(product, str) or not isinstance(quantity, (int, float)) or not isinstance(price, (int, float)):
                 # skip invalid entries
                 continue 
-
+            
+            # get revenue per dictionary
             revenue = quantity * price
+
+            # add the revenue per dictionary
             total_revenue += revenue
+
+            # count the dictionaries
             valid_sales_count += 1
 
+            # if sale["product"] is in product_totals add its revenue to itself
             if product in product_totals:
                 product_totals[product] += revenue
+            # if sale["product"] is not in product_totals add it to the dictionary
             else:
                 product_totals[product] = revenue
         except KeyError:
             continue
 
+    # get the total number of unique products
     unique_prods = len(product_totals)
 
+    # sum of every revenue per dictionary not per unique products
+    # if valid_sales_count is zero, make the avg_sale zero
     avg_sale = total_revenue / valid_sales_count if valid_sales_count else 0
 
+    # get the product with the highest revenue by comparing the values of the keys
     highest_sale = max(product_totals, key=product_totals.get) if product_totals else None
 
     return {

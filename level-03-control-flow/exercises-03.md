@@ -213,10 +213,10 @@ sales = [
 
 **Expected Output Format:**
 ```
-Total Revenue: 135.0
+Total Revenue: 177.5
 Unique Products: 3
-Average Sale: 33.75
-Top Product: A
+Average Sale: 43.75
+Top Product: C
 ```
 
 ---

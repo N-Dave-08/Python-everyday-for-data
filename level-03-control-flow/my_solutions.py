@@ -386,7 +386,7 @@ print(f"Evens: {evens}")
 #   Total Revenue: 177.5
 #   Unique Products: 3
 #   Average Sale: 43.75
-#   Top Product: C
+#   Top Product: A
 
 sales = [
       {"product": "A", "quantity": 10, "price": 5.0},
@@ -449,3 +449,8 @@ def analyze_sales(final_result):
 
 
 final_result = analyze_sales(sales)
+
+print(f"Total Revenue: {final_result["total_revenue"]}")
+print(f"Unique Products: {final_result["unique_prods"]}")
+print(f"Average Sale: {final_result["avg_sale"]}")
+print(f"Top Product: {final_result["highest_sale"]}")

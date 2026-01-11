@@ -216,7 +216,7 @@ sales = [
 Total Revenue: 177.5
 Unique Products: 3
 Average Sale: 43.75
-Top Product: C
+Top Product: A
 ```
 
 ---

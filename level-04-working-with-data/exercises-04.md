@@ -140,13 +140,13 @@ Average salary: 73333.33
 
 Using the `employees.csv` file, write a Python program that:
 1. Reads the data with pandas
-2. Filters employees with salary > 70000
+2. Filters employees with salary >= 70000
 3. Filters employees in Engineering department
 4. Creates a new CSV file with high-salary employees
 
 **Expected Output Format:**
 ```
-High salary employees (>70000):
+High salary employees (>=70000):
    name  age    department  salary
 0  John   30  Engineering   85000
 2   Bob   35        Sales   70000

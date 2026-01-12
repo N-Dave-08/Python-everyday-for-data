@@ -1,0 +1,5 @@
+Product: Laptop, Price: $999.99
+Product: Mouse, Price: $29.99
+Product: Keyboard, Price: $89.99
+Product: Monitor, Price: $349.99
+Product: Headphones, Price: $149.99

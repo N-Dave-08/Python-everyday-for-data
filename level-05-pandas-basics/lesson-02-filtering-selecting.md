@@ -30,7 +30,7 @@ high_salary_engineers = df[(df['salary'] > 70000) & (df['job_title'] == 'Softwar
 high_salary_or_engineers = df[(df['salary'] > 70000) | (df['job_title'] == 'Software Engineer')]
 
 # NOT condition (use ~)
-not_engineers = df[~df['job_title'] == 'Software Engineer']
+not_engineers = df[~(df['job_title'] == 'Software Engineer')]
 ```
 
 ### Common Filtering Operations

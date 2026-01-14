@@ -52,7 +52,7 @@ Using the `employees.csv` file:
 
 **Expected Output Format:**
 ```
-High salary employees: 8 employees
+High salary employees: 7 employees
 Department 1 employees: 6 employees
 Software Engineers: 4 employees
 ```

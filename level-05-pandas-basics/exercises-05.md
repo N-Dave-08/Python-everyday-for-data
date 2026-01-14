@@ -54,7 +54,7 @@ Using the `employees.csv` file:
 ```
 High salary employees: 7 employees
 Department 1 employees: 6 employees
-Software Engineers: 4 employees
+Software Engineers: 3 employees
 ```
 
 ---

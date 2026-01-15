@@ -14,3 +14,4 @@ employee_id,first_name,last_name,email,phone,hire_date,job_title,salary,departme
 13,Richard,Thomas,richard.thomas@company.com,555-0113,2018-11-25,Senior Engineer,92000.0,1
 14,Michelle,Jackson,michelle.jackson@company.com,555-0114,2022-01-08,Data Analyst,71000.0,2
 15,Joseph,White,joseph.white@company.com,555-0115,2021-03-15,Marketing Manager,76000.0,3
+

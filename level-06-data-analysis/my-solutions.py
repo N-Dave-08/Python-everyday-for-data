@@ -1,5 +1,4 @@
 import pandas as pd
-from pandas.io.formats import printing
 
 # Exercise 1: Basic Grouping
 # Difficulty: Beginner
@@ -37,12 +36,12 @@ for dept, salary in avg_salary.items():
 
 emp_count = grouped['employee_id'].sum()
 print("\nEmployee count by department: ")
-for dept, emp in avg_salary.items():
-    print(f"Department {dept}: ${emp}")
+for dept, emp in emp_count.items():
+    print(f"Department {dept}: {emp} employees")
 
 dept_highest_salary = grouped['salary'].max()
 print("\nHighest salary by department: ")
-for dept, salary in avg_salary.items():
+for dept, salary in dept_highest_salary.items():
     print(f"Department {dept}: ${salary}")
 
 # =================================================================================
@@ -170,6 +169,25 @@ for dept, row in grouped.iterrows():
 #   Alice Johnson - Data Science - $72000.00
 #   ...
 
+employees = pd.read_csv('data/datasets/employees.csv')
+departments = pd.read_csv('data/datasets/departments.csv')
+
+merged = pd.merge(
+    employees,
+    departments,
+    on='department_id',
+    how='inner'
+)
+
+merged['full_name'] = merged['first_name'] + ' ' + merged['last_name']
+
+result = merged[['full_name', 'department_name', 'salary']]
+
+print("Employee - Department - Salary:\n")
+
+for _, row in merged.iterrows():
+    print(f"{row['full_name']} - {row['department_name']} - ${row['salary']}")
+
 # =================================================================================
 
 # Exercise 6: Different Join Types
@@ -188,6 +206,36 @@ for dept, row in grouped.iterrows():
 # Left join: 15 rows
 # Right join: 15 rows
 # (Actual numbers may vary based on data)
+
+employees = pd.read_csv('data/datasets/employees.csv')
+departments = pd.read_csv('data/datasets/departments.csv')
+
+inner_join = pd.merge(
+    employees,
+    departments,
+    on='department_id',
+    how='inner'
+)
+print(f"Inner join: {inner_join.shape[0]} rows")
+# inner join is returning data that are in both tables
+
+left_join = pd.merge(
+    employees,
+    departments,
+    on='department_id',
+    how='left'
+)
+print(f"Left join: {left_join.shape[0]} rows")
+# left join is returning data Nan if the right table has empty value for the reference
+
+right_join = pd.merge(
+    employees,
+    departments,
+    on='department_id',
+    how='right'
+)
+print(f"Right join: {right_join.shape[0]} rows")
+# right join is returning data Nan if the left table has empty value for the reference
 
 # =================================================================================
 
@@ -208,6 +256,29 @@ for dept, row in grouped.iterrows():
 
 # Top customer: Alice Adams
 
+customers = pd.read_csv('data/datasets/customers.csv')
+orders = pd.read_csv('data/datasets/orders.csv')
+
+merged = pd.merge(
+    customers,
+    orders,
+    on='customer_id',
+    how='left'
+)
+
+total_orders = (
+    merged.groupby(['customer_id', 'first_name', 'last_name'])['total_amount']
+    .sum()
+    .reset_index() # reset_index() is needed to make new index, and not use customer_id, first_name, last_name as index
+)
+
+for _, row in total_orders.iterrows():
+    print(f"{row['first_name']} {row['last_name']}: ${row['total_amount']}")
+
+highest_order_amount = merged.iloc[total_orders['total_amount'].idxmax()]
+
+print(f"\nTop customer: {highest_order_amount['first_name']} {highest_order_amount['last_name']}")
+
 # =================================================================================
 
 # Exercise 8: Pivot Tables
@@ -227,6 +298,43 @@ for dept, row in grouped.iterrows():
 # Department 2         ...             71000.00
 # ...
 
+employees = pd.read_csv('data/datasets/employees.csv')
+departments = pd.read_csv('data/datasets/departments.csv')
+
+merged = pd.merge(
+    employees,
+    departments,
+    on='department_id',
+    how='inner'
+)
+
+avg_salary = pd.pivot_table(
+    merged,
+    values='salary',
+    index=['department_name', 'job_title'],
+    aggfunc='mean'
+)
+print("Average Salary Pivot: \n")
+for dept, group in avg_salary.groupby('department_name'):
+    print(f"{dept}:")
+    for job, row in group.iterrows():
+        print(f"    {job[1]}: ${row['salary']:.2f}")
+    print()
+
+emp_count = pd.pivot_table(
+    merged,
+    values='employee_id',
+    index=['department_name', 'job_title'],
+    aggfunc='count'
+)
+print("Employee Count Pivot: ")
+for dept, group in emp_count.groupby('department_name'):
+    print(f"{dept}:")
+    for job, row in group.iterrows():
+        print(f"    {job[1]}: {row['employee_id']} employees")
+    print()
+
+
 # =================================================================================
 
 # Exercise 9: Transform Operations
@@ -243,6 +351,19 @@ for dept, row in grouped.iterrows():
 # Employee salary analysis:
 #   John: $85000 (100% of dept avg, 0.0 std dev)
 #   ...
+
+employees = pd.read_csv('data/datasets/employees.csv')
+
+dept_avg = employees.groupby('department_id')['salary'].mean()
+employees['salary_percent'] = employees['salary'] / employees['department_id'].map(dept_avg) * 100
+
+dept_stats = employees.groupby('department_id')['salary'].agg(['mean', 'std'])
+employees['salary_zscore'] = (
+    # (employee's salary - employee's department salary mean) / employee's department std
+    (employees['salary'] - employees['department_id'].map(dept_stats['mean'])) /
+    employees['department_id'].map(dept_stats['std'])
+)
+
 
 # =================================================================================
 
@@ -271,3 +392,53 @@ for dept, row in grouped.iterrows():
 #   Top performer per department:
 #     Engineering: John Smith
 #     ...
+
+employees = pd.read_csv('data/datasets/employees.csv')
+departments = pd.read_csv('data/datasets/departments.csv')
+sales = pd.read_csv('data/datasets/sales.csv')
+
+emp_sales = pd.merge(
+    employees,
+    sales,
+    on='employee_id',
+    how='left'
+)
+
+emp_total_sales = (
+    emp_sales
+    .groupby(['department_id', 'employee_id', 'first_name', 'last_name'])['total_amount']
+    .sum()
+    .reset_index()
+)
+emp_total_sales['full_name'] = emp_total_sales['first_name'] + ' ' + emp_total_sales['last_name']
+print("\nTotal sales per employee: ")
+for _, row in emp_total_sales.iterrows():
+    print(f"{row['full_name']}: ${row['total_amount']:.2f}")
+
+avg_dept_sales = emp_sales.groupby('department_id')['total_amount'].mean()
+avg_dept_sales = avg_dept_sales.reset_index()
+avg_dept_sales = pd.merge(
+    avg_dept_sales,
+    departments[['department_id', 'department_name']],
+    on='department_id',
+    how='left'
+)
+print("\nAverage sales by department: ")
+for _, row in avg_dept_sales.iterrows():
+    print(f"{row['department_name']}: ${row['total_amount']:.2f}")
+
+emp_total_sales = emp_total_sales.reset_index()
+emp_total_sales = pd.merge(
+    emp_total_sales,
+    departments[['department_id', 'department_name']],
+    on='department_id',
+    how='left'
+)
+
+top_emp = emp_total_sales.loc[
+    emp_total_sales.groupby('department_id')['total_amount'].idxmax()
+]
+top_emp['full_name'] = top_emp['first_name'] + ' ' + top_emp['last_name']
+print("\nTop performer per department: ")
+for _, row in top_emp.iterrows():
+    print(f"{row['department_name']}: {row['full_name']}")

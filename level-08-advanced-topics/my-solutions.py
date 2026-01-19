@@ -97,6 +97,27 @@ print(f"Average title length: {avg_length} characters")
 # Error: Connection timeout
 # Error: Invalid status code: 404
 
+import requests
+
+try:
+    res = requests.get('https://jsonplaceholder.typicode.com/invalid', timeout=5)
+    res.raise_for_status()
+    data = res.json()
+    print("Successfully fetched data")
+except requests.exceptions.Timeout:
+    print(f"Error: Connection Timeout")
+except requests.exceptions.HTTPError as e:
+    print(f"Error: Invalid status code: {e.response.status_code}")
+except requests.exceptions.ConnectionError:
+    print("Error: Connection Error")
+except requests.exceptions.RequestException as e:
+    print(f"Error: {e}")
+
+# Test cases
+# https://jsonplaceholder.typicode.com/posts'       valid
+# https://jsonplaceholder.typicode.com/invalid'     404
+# https://this-url-does-not-exist.xyz'              connection error
+
 # =================================================================================
 
 # Exercise 4: Web Scraping Basics
@@ -117,6 +138,54 @@ print(f"Average title length: {avg_length} characters")
 # Found 5 paragraphs
 # Data saved to scraped_data.csv
 
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+# fetch html
+url = 'https://quotes.toscrape.com'
+res = requests.get(url)
+html = res.text
+
+soup = BeautifulSoup(html, 'html.parser')
+
+# headings
+headings = soup.find_all(['h1', 'h2', 'h3'])
+
+headings_num = len(headings)
+
+print(f"Found {headings_num} headings")
+
+# links
+links = soup.find_all('a')
+
+links_num = len(links)
+
+print(f"Found {links_num} links")
+
+# paragraphs
+paragraphs = soup.find_all('p')
+
+paragraphs_num = len(paragraphs)
+
+print(f"Found {paragraphs_num} paragraphs")
+
+# save to csv
+with open('level-08-advanced-topics/scraped_data.csv', 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Type', 'Content'])
+
+    for h in headings:
+        writer.writerow(['Heading', h.get_text(strip=True)])
+    
+    for l in links:
+        writer.writerow(['Heading', l.get_text(strip=True)])
+
+    for p in paragraphs:
+        writer.writerow(['Heading', p.get_text(strip=True)])
+
+print("Data saved to scraped_data.csv")
+
 # =================================================================================
 
 # Exercise 5: Scraping Tables
@@ -133,6 +202,42 @@ print(f"Average title length: {avg_length} characters")
 # Table extracted: 10 rows, 5 columns
 # Average value: 42.5
 # Data saved to table_data.csv
+
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+from io import StringIO
+
+# Fetch HTML
+url = 'https://www.w3schools.com/html/html_tables.asp'
+res = requests.get(url)
+res.raise_for_status()
+
+html = res.text
+
+# Parse HTML and extract the first table
+soup = BeautifulSoup(html, 'html.parser')
+table = soup.find('table')
+
+# Convert to pandas DataFrame
+df = pd.read_html(StringIO(str(table)))[0]
+
+# Simple analysis
+rows, cols = df.shape
+print(f"Table extracted: {rows} rows, {cols} columns")
+
+# For this table, we’ll treat the Contact and Country fields as non-numeric
+# and only count lengths if there were numeric columns.
+# As a placeholder average, we could use the length of company names:
+
+df['Company_Length'] = df['Company'].str.len()
+avg_length = df['Company_Length'].mean()
+
+print(f"Average company name length: {avg_length:.2f} characters")
+
+# Save to CSV
+df.to_csv('level-08-advanced-topics/table_data.csv', index=False)
+print("Data saved to table_data.csv")
 
 # =================================================================================
 
@@ -153,6 +258,42 @@ print(f"Average title length: {avg_length} characters")
 # Test samples: 3
 # Mean Squared Error: 1234567.89
 # R² Score: 0.75
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+employees = pd.read_csv('data/datasets/employees.csv')
+
+# feature
+X = employees[['age']]
+# target
+y = employees['salary']
+
+# split into train and test sets (80/20)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+print(f"Training samples: {len(X_train)}")
+print(f"Testing samples: {len(X_test)}")
+
+# train linear regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# predictions
+predictions = model.predict(X_test)
+
+# calculate error metrics
+mse = mean_squared_error(y_test, predictions)
+r2 = r2_score(y_test, predictions)
+
+print(f"Mean Squared Error: {mse:.2f}")
+print(f"R² Score: {r2:.2f}")
+
+results = pd.DataFrame({'Actual': y_test, 'Predicted': predictions})
+print("\n Predictions vs Actual:")
+print(results)
 
 # =================================================================================
 
@@ -175,6 +316,36 @@ print(f"Average title length: {avg_length} characters")
 #        False       0.85      0.92      0.88         6
 #         True       0.90      0.82      0.86         6
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+employees = pd.read_csv('data/datasets/employees.csv')
+
+employees['high_earner'] = employees['salary'] > 75000
+
+# features
+X = employees[['age', 'department_id']]
+y = employees['high_earner']
+
+# split into train/test sets (80/20)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# predictions
+predictions = model.predict(X_test)
+
+# evaluate
+accuracy = accuracy_score(y_test, predictions)
+report = classification_report(y_test, predictions)
+
+print(f"Accuracy: {accuracy:.2f}")
+print(f"Classification Report:")
+print(report)
+
 # =================================================================================
 
 # Exercise 8: Data Preprocessing
@@ -195,6 +366,42 @@ print(f"Average title length: {avg_length} characters")
 #   Missing values: 0
 #   Features scaled: Yes
 
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+employees = pd.read_csv('level-08-advanced-topics/employees_unclean.csv')
+
+# check for missing values
+print("Missing Values: \n")
+print(employees.isna().sum())
+
+# fill missing values
+employees['salary'].fillna(employees['salary'].median(), inplace=True)
+employees['age'].fillna(employees['age'].median(), inplace=True)
+employees['phone'].fillna('Unknown', inplace=True)
+
+# after processing
+print("After preprocessing: ")
+print(employees.isna().sum())
+
+# scale the numerical features
+scaler = StandardScaler()
+numerical_features = ['age', 'salary']
+employees[numerical_features] = scaler.fit_transform(employees[numerical_features])
+
+print("\nNumerical features scaled: ")
+print(employees[numerical_features].head())
+
+# prepare date for model
+employees['high_earner'] = employees['salary'] > 0
+
+X = employees[['age', 'department_id']]
+y = employees['high_earner']
+
+print("\nPrepare data for ML model: ")
+print(f"Features (X) shape: {X.shape}")
+print(f"Target (y) shape: {y.shape}")
+
 # =================================================================================
 
 # Exercise 9: Clustering
@@ -213,6 +420,40 @@ print(f"Average title length: {avg_length} characters")
 # Cluster 0: 5 employees, avg salary: $65000
 # Cluster 1: 6 employees, avg salary: $80000
 # Cluster 2: 4 employees, avg salary: $90000
+
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+employees = pd.read_csv('level-08-advanced-topics/employees.csv')
+
+# features
+features = employees[['age', 'salary']]
+
+# scale the features
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# apply k-Means clustering
+k = 3
+kmeans = KMeans(n_clusters=k, random_state=42)
+employees['cluster'] = kmeans.fit_predict(scaled_features)
+
+# visualize clusters
+plt.figure(figsize=(8,6))
+plt.scatter(employees['age'], employees['salary'], c=employees['cluster'], cmap='viridis', s=100)
+plt.xlabel('Age')
+plt.ylabel('Salary')
+plt.title('K-Means Clustering of Employees')
+plt.colorbar(label='Cluster')
+plt.show()
+
+for cluster_num in range(k):
+    cluster_data = employees[employees['cluster'] == cluster_num]
+    num_employees = len(cluster_data)
+    avg_salary = cluster_data['salary'].mean()
+    print(f"Cluster {cluster_num}: {num_employees} employees, average salary: ${avg_salary:,.0f}")
 
 # =================================================================================
 
@@ -237,3 +478,115 @@ print(f"Average title length: {avg_length} characters")
 #   Linear Regression: MSE = 1234567, R² = 0.75
 #   Random Forest: MSE = 987654, R² = 0.82
 # Best model: Random Forest
+
+# Exercise 10: Complete ML Pipeline with employees.csv and departments.csv
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+# ==========================================
+# 1. Load data
+# ==========================================
+employees = pd.read_csv('data/datasets/employees.csv')
+departments = pd.read_csv('data/datasets/departments.csv')
+
+# Merge datasets to get department info
+data = employees.merge(departments, on='department_id', how='left')
+print(f"Data loaded: {data.shape[0]} samples")
+print(data.head())
+
+# ==========================================
+# 2. Handle missing values and outliers
+# ==========================================
+# Fill missing numerical values with mean
+num_cols = ['salary', 'age', 'budget']
+data[num_cols] = data[num_cols].fillna(data[num_cols].mean())
+
+# Clip salary and age to 1st-99th percentile to handle outliers
+for col in ['salary', 'age']:
+    lower = data[col].quantile(0.01)
+    upper = data[col].quantile(0.99)
+    data[col] = data[col].clip(lower, upper)
+
+# ==========================================
+# 3. Feature engineering
+# ==========================================
+# Encode categorical features
+cat_features = ['job_title', 'department_name', 'location']
+num_features = ['age', 'budget']
+
+X = data[cat_features + num_features]
+y = data['salary']
+
+# ==========================================
+# 4. Split data
+# ==========================================
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# ==========================================
+# 5. Preprocessing and pipelines
+# ==========================================
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(handle_unknown='ignore'), cat_features),
+        ('num', 'passthrough', num_features)
+    ]
+)
+
+# Linear Regression pipeline
+lr_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', LinearRegression())
+])
+
+# Random Forest pipeline
+rf_pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
+])
+
+# ==========================================
+# 6. Train models
+# ==========================================
+lr_pipeline.fit(X_train, y_train)
+rf_pipeline.fit(X_train, y_train)
+
+# Predictions
+y_pred_lr = lr_pipeline.predict(X_test)
+y_pred_rf = rf_pipeline.predict(X_test)
+
+# Model performance
+mse_lr = mean_squared_error(y_test, y_pred_lr)
+r2_lr = r2_score(y_test, y_pred_lr)
+
+mse_rf = mean_squared_error(y_test, y_pred_rf)
+r2_rf = r2_score(y_test, y_pred_rf)
+
+print("Model Comparison:")
+print(f"  Linear Regression: MSE = {int(mse_lr)}, R² = {r2_lr:.2f}")
+print(f"  Random Forest: MSE = {int(mse_rf)}, R² = {r2_rf:.2f}")
+
+best_model = 'Linear Regression' if r2_lr > r2_rf else 'Random Forest'
+print(f"Best model: {best_model}")
+
+# ==========================================
+# 7. Visualize results
+# ==========================================
+plt.figure(figsize=(10,5))
+plt.plot(y_test.values, label='Actual', marker='o')
+plt.plot(y_pred_lr, label='LR Predictions', marker='x')
+plt.plot(y_pred_rf, label='RF Predictions', marker='s')
+plt.title('Actual vs Predicted Salaries')
+plt.xlabel('Sample')
+plt.ylabel('Salary')
+plt.legend()
+plt.show()
